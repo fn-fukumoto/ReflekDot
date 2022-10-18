@@ -15,6 +15,7 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private TextMeshProUGUI _score;
     [SerializeField] private TextMeshProUGUI _resultScore;
+    [SerializeField] private TextMeshProUGUI _hiScore;
 
     [SerializeField] private float _playerSpeed = 20f;
 
@@ -60,8 +61,6 @@ public class GameManager : MonoBehaviour
         _mainPanel.gameObject.SetActive(false);
         _controlPanel.gameObject.SetActive(false);
         _gameOverPanel.gameObject.SetActive(false);
-        PlayerPrefs.SetInt("SCORE", 0);
-        PlayerPrefs.Save();
     }
 
     /// <summary>
@@ -138,6 +137,21 @@ public class GameManager : MonoBehaviour
     private void GameOver()
     {
         _gameOverPanel.gameObject.SetActive(true);
-        _resultScore.text = "SCORE: " + PlayerPrefs.GetInt("SCORE").ToString();
+        _mainPanel.gameObject.SetActive(false);
+        _controlPanel.gameObject.SetActive(false);
+
+        int score = PlayerPrefs.GetInt("SCORE", 0);
+        int hiScore = PlayerPrefs.GetInt("HISCORE", 0);
+
+        _resultScore.text = score.ToString();
+        if (score > hiScore)
+        {
+            _hiScore.text = score.ToString();
+            PlayerPrefs.SetInt("HISCORE", score);
+            PlayerPrefs.Save();
+        } else
+        {
+            _hiScore.text = hiScore.ToString();
+        }
     }
 }
