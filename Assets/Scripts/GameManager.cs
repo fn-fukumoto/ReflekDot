@@ -14,6 +14,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Transform _gameOverPanel;
 
     [SerializeField] private TextMeshProUGUI _score;
+    [SerializeField] private TextMeshProUGUI _resultScore;
 
     [SerializeField] private float _playerSpeed = 20f;
 
@@ -48,15 +49,19 @@ public class GameManager : MonoBehaviour
 
     /// <summary>
     /// ゲームの初期化処理
-    /// ドットの位置を初期化し、TAP TO STARTのみ表示
+    /// ドットとプレイヤーの位置を初期化し、スコアの初期化、TAP TO STARTのみ表示
     /// </summary>
     private void InitializeGame()
     {
         _dot.localPosition = Vector3.zero;
+        _player.GetComponent<RectTransform>().anchoredPosition = new Vector3(0, 500, 0);
+        _score.text = "0";
         _startPanel.gameObject.SetActive(true);
         _mainPanel.gameObject.SetActive(false);
         _controlPanel.gameObject.SetActive(false);
         _gameOverPanel.gameObject.SetActive(false);
+        PlayerPrefs.SetInt("SCORE", 0);
+        PlayerPrefs.Save();
     }
 
     /// <summary>
@@ -68,7 +73,7 @@ public class GameManager : MonoBehaviour
         _startPanel.gameObject.SetActive(false);
         _mainPanel.gameObject.SetActive(true);
         _controlPanel.gameObject.SetActive(true);
-        _dot.GetComponent<DotController>().InitializeDot();
+        _dot.GetComponent<DotController>().Initialize();
 
         _mainPanelRect = _mainPanel.GetComponent<RectTransform>();
     }
@@ -76,7 +81,7 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// リトライボタン押下時、ゲームの初期化を行う
     /// </summary>
-    public void OnClickReteryButton()
+    public void OnClickRetryButton()
     {
         InitializeGame();
     }
@@ -133,6 +138,6 @@ public class GameManager : MonoBehaviour
     private void GameOver()
     {
         _gameOverPanel.gameObject.SetActive(true);
-        _score.text = "SCORE: " + PlayerPrefs.GetInt("SCORE").ToString();
+        _resultScore.text = "SCORE: " + PlayerPrefs.GetInt("SCORE").ToString();
     }
 }
