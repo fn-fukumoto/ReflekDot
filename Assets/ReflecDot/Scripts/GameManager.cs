@@ -5,24 +5,32 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    [Header("Main")]
     [SerializeField] private Transform _player;
     [SerializeField] private Transform _dot;
 
+    [Header("Panel")]
     [SerializeField] private Transform _startPanel;
     [SerializeField] private Transform _mainPanel;
     [SerializeField] private Transform _controlPanel;
     [SerializeField] private Transform _gameOverPanel;
 
+    [Header("Score")]
     [SerializeField] private TextMeshProUGUI _score;
     [SerializeField] private TextMeshProUGUI _resultScore;
     [SerializeField] private TextMeshProUGUI _hiScore;
 
+    [Header("Option")]
     [SerializeField] private float _playerSpeed = 20f;
+    [SerializeField] private bool _isButtonControll = true;
+    [SerializeField] private float _swipeSensitivity = 1f;
 
     public bool L_Flg { get; set; } = false;
     public bool R_Flg { get; set; } = false;
 
     private RectTransform _mainPanelRect;
+
+    private Vector3 _prePos, _curPos;
 
     /// <summary>
     /// 開始時に1回だけ呼ばれる処理
@@ -37,6 +45,7 @@ public class GameManager : MonoBehaviour
     /// </summary>
     void Update()
     {
+        SwipeMovePlayer();
         if (IsGameOver()) GameOver();
     }
 
@@ -74,6 +83,16 @@ public class GameManager : MonoBehaviour
         _controlPanel.gameObject.SetActive(true);
         _dot.GetComponent<DotController>().Initialize();
 
+        if (_isButtonControll)
+        {
+            _controlPanel.GetChild(0).gameObject.SetActive(true);
+            _controlPanel.GetChild(1).gameObject.SetActive(false);
+        } else
+        {
+            _controlPanel.GetChild(0).gameObject.SetActive(false);
+            _controlPanel.GetChild(1).gameObject.SetActive(true);
+        }
+
         _mainPanelRect = _mainPanel.GetComponent<RectTransform>();
     }
 
@@ -90,34 +109,58 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void MovePlayer()
     {
+        if (!_isButtonControll) return;
+
         // 左移動
         if (L_Flg || Input.GetKey(KeyCode.LeftArrow))
         {
             // 移動処理
-            _player.position = new Vector3(
-                _player.position.x - _playerSpeed,
-                _player.position.y,
-                _player.position.z
-                );
-            // 左端移動制限
-            _player.position = _player.position.x < 0
-                ? new Vector3(0, _player.position.y, _player.position.z)
-                : _player.position;
+            _player.transform.Translate(-_playerSpeed, 0, 0);
         }
 
         // 右移動
         if (R_Flg || Input.GetKey(KeyCode.RightArrow))
         {
             // 移動処理
-            _player.position = new Vector3(
-                _player.position.x + _playerSpeed,
-                _player.position.y,
-                _player.position.z
-                );
-            // 右端移動制限
-            _player.position = _player.position.x > _mainPanelRect.rect.width
-                ? new Vector3(_mainPanelRect.rect.width, _player.position.y, _player.position.z)
-                : _player.position;
+            _player.transform.Translate(_playerSpeed, 0, 0);
+        }
+
+        checkPlayerPositionLimit();
+    }
+
+    /// <summary>
+    /// プレイヤーの移動処理（スワイプ操作）
+    /// </summary>
+    public void SwipeMovePlayer()
+    {
+        if (_isButtonControll) return;
+
+        if (Input.GetMouseButton(0))
+        {
+            // 移動
+            _player.transform.Translate(
+                Input.touches[0].deltaPosition.x * _swipeSensitivity, 0, 0);
+        }
+    }
+
+    /// <summary>
+    /// 移動制限処理
+    /// </summary>
+    public void checkPlayerPositionLimit()
+    {
+        var px = _player.position.x;
+        var py = _player.position.y;
+        var pz = _player.position.z;
+        var minX = 0f;
+        var maxX = _mainPanelRect != null ? _mainPanelRect.rect.width : 0f;
+
+        if (px < minX)
+        {
+            _player.position = new Vector3(minX, py, pz);
+        }
+        else if(px > maxX)
+        {
+            _player.position = new Vector3(maxX, py, pz);
         }
     }
 

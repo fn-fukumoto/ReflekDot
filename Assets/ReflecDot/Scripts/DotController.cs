@@ -30,13 +30,15 @@ public class DotController : MonoBehaviour
 
     public void Initialize()
     {
-
         rb = GetComponent<Rigidbody2D>();
         _dotTransform = transform;
         rb.velocity = new Vector2(_speed, _speed);
         PlayerPrefs.SetInt("SCORE", 0);
         PlayerPrefs.Save();
         _reflectCnt = 0;
+
+        Vector3 v = transform.position;
+        transform.position = new Vector3(v.x, v.y, -10);
     }
 
     public void OnCollisionEnter2D(Collision2D collision)
