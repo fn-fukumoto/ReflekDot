@@ -141,6 +141,8 @@ public class GameManager : MonoBehaviour
             _player.transform.Translate(
                 Input.touches[0].deltaPosition.x * _swipeSensitivity, 0, 0);
         }
+
+        checkPlayerPositionLimit();
     }
 
     /// <summary>
@@ -170,7 +172,7 @@ public class GameManager : MonoBehaviour
     /// <returns></returns>
     private bool IsGameOver()
     {
-        return _dot.position.y < 0;
+        return _dot.position.y < _player.position.y;
     }
 
     /// <summary>
